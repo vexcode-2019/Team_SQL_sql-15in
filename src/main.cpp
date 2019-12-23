@@ -28,9 +28,9 @@ float scaleFactor = SCALE_FACTOR_MEDIUM;
 
 //enum for different drive speeds
 enum driveSpeed{
-  fast,
-  medium,
-  slow
+  driveFast,
+  driveMedium,
+  driveSlow
 };
 
 //text description of current drive speed
@@ -74,7 +74,7 @@ int inline joyaxis(int i) {
 
 //robot initialization
 void pre_auton(){
-  setDriveSpeed(medium);
+  setDriveSpeed(driveMedium);
   timer::event(updateScreen, 5000);
 }
 
@@ -83,13 +83,13 @@ void teleop(){
   //set callbacks for controller buttons
   //change drive speed:
   Controller.ButtonA.released([]{ 
-    setDriveSpeed(fast);
+    setDriveSpeed(driveFast);
   });
   Controller.ButtonB.released([]{ 
-    setDriveSpeed(medium);
+    setDriveSpeed(driveMedium);
   });
   Controller.ButtonX.released([]{ 
-    setDriveSpeed(slow);
+    setDriveSpeed(driveSlow);
   });
 
   //main control loop
