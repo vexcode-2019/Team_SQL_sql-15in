@@ -22,43 +22,63 @@ using std::string;
 #define SCALE_FACTOR_SLOW 0.25
 float scaleFactor = SCALE_FACTOR_MEDIUM;
 
+enum driveSpeed{
+  fast,
+  medium,
+  slow
+};
+
+string driveSpeedText = "";
+
+void updateScreen(){
+  ControllerScreen.clearScreen();
+  ControllerScreen.setCursor(1, 0);
+  ControllerScreen.print("Drive Speed: %s", driveSpeedText.c_str());
+  ControllerScreen.setCursor(2, 0);
+  ControllerScreen.print("Battery: %d%%", Battery.capacity());
+}
+
+void setDriveSpeed(driveSpeed speed){
+  //set the drive speed to the appropriate value
+  switch(speed){
+    case fast:
+      scaleFactor = SCALE_FACTOR_FAST;
+      driveSpeedText = "Fast";
+    break;
+    case medium:
+      scaleFactor = SCALE_FACTOR_MEDIUM;
+      driveSpeedText = "Medium";
+    break;
+    case slow:
+      scaleFactor = SCALE_FACTOR_SLOW;
+      driveSpeedText = "Slow";
+    break;
+  }
+
+  //update the controller display
+  updateScreen();
+}
+
 int inline joyaxis(int i) {
   return (abs(i) > DEADZONE ? int(pow(double(i)/100, 3)*100) : 0);
 }
 
-void printBattery(){
-  ControllerScreen.setCursor(2,1);
-  ControllerScreen.print("Battery: %d", Battery.capacity());
-
-  timer::event(printBattery, 5000);
-}
-
 void pre_auton(){
-  ControllerScreen.clearScreen();
-  ControllerScreen.setCursor(1, 1);
-  ControllerScreen.print("Drive Speed: Medium");
-  printBattery();
+  setDriveSpeed(medium);
+  timer::event(updateScreen, 5000);
 }
 
 void teleop(){
   Controller.ButtonA.released([]{ 
-    scaleFactor = SCALE_FACTOR_FAST;
-      ControllerScreen.setCursor(1, 1);
-      ControllerScreen.clearLine();
-      ControllerScreen.print("Drive Speed: Fast");
+    setDriveSpeed(fast);
   });
   Controller.ButtonB.released([]{ 
-    scaleFactor = SCALE_FACTOR_MEDIUM; 
-      ControllerScreen.setCursor(1, 1);
-      ControllerScreen.clearLine();
-      ControllerScreen.print("Drive Speed: Medium");
+    setDriveSpeed(medium);
   });
   Controller.ButtonX.released([]{ 
-    scaleFactor = SCALE_FACTOR_SLOW;
-      ControllerScreen.setCursor(1, 1);
-      ControllerScreen.clearLine();
-      ControllerScreen.print("Drive Speed: Slow");
+    setDriveSpeed(slow);
   });
+
   while (true){
     int axis1 = joyaxis(Controller.Axis1.position());
     int axis3 = joyaxis(Controller.Axis3.position());
