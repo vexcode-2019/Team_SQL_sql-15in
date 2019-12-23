@@ -49,15 +49,15 @@ void updateScreen(){
 void setDriveSpeed(driveSpeed speed){
   //set the scale factor to the appropriate value
   switch(speed){
-    case fast:
+    case driveFast:
       scaleFactor = SCALE_FACTOR_FAST;
       driveSpeedText = "Fast";
     break;
-    case medium:
+    case driveMedium:
       scaleFactor = SCALE_FACTOR_MEDIUM;
       driveSpeedText = "Medium";
     break;
-    case slow:
+    case driveSlow:
       scaleFactor = SCALE_FACTOR_SLOW;
       driveSpeedText = "Slow";
     break;
