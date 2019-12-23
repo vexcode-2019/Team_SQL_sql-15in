@@ -86,19 +86,13 @@ void teleop(){
     RDrive.spin(fwd, scaleFactor * (axis3 - axis1), percent);
 
     if (Controller.ButtonL1.pressing()){
-      // Lift.spin(fwd, 30, percent);
-      LLift.spin(fwd, 60, percent);
-      RLift.spin(fwd, 60, percent);
+      Lift.spin(fwd, 50, percent);
     }
     else if (Controller.ButtonL2.pressing()){
-      // Lift.spin(reverse, 30, percent);
-      LLift.spin(reverse, 60, percent);
-      RLift.spin(reverse, 60, percent);
+      Lift.spin(reverse, 50, percent);
     }
     else{
-      // Lift.stop(hold);
-      LLift.stop(hold);
-      RLift.stop(hold);
+      Lift.stop(hold);
     }
 
     if (Controller.ButtonR1.pressing()){
