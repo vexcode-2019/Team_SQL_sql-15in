@@ -4,6 +4,7 @@ using namespace vex;
 
 // A global instance of brain used for printing to the V5 brain screen
 brain Brain;
+limit liftSwitch = limit(Brain.ThreeWirePort.B);
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Text.

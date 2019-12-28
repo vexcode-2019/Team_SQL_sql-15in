@@ -1,7 +1,7 @@
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
 /*    Module:       main.cpp                                                  */
-/*    Author:       John Holbrook, VEXU Team SQL                              */
+/*    Author:       John Holbrook & Philip Taylor, VEXU Team SQL              */
 /*    Created:      Mon Dec 16 2019                                           */
 /*    Description:  Control code for Team SQL 2019-2020 15-inch robot         */
 /*                                                                            */
@@ -12,6 +12,9 @@
 
 //device definitions
 #include "devices.h"
+
+//compiler recommends cmath to do abs() on floats (using std::abs)
+#include <cmath>
 
 //auto-include some common scopes
 using namespace vex;
@@ -33,16 +36,22 @@ enum driveSpeed{
   driveSlow
 };
 
-//text description of current drive speed
+//text description of current drive speed and lift height
 string driveSpeedText = "";
+string liftHeightText = "";
 
 //Write the current drive speed and robot battery level to the controller screen
 void updateScreen(){
+  float liftTemp = (LLift.temperature(temperatureUnits::fahrenheit) + RLift.temperature(temperatureUnits::fahrenheit))/2.0;
+
   ControllerScreen.clearScreen();
   ControllerScreen.setCursor(1, 0);
-  ControllerScreen.print("Drive Spd: %s", driveSpeedText.c_str());
+  ControllerScreen.print("Drive: %s", driveSpeedText.c_str());
   ControllerScreen.setCursor(2, 0);
-  ControllerScreen.print("Battery: %d%%", Battery.capacity());
+  ControllerScreen.print("Lift: %s", liftHeightText.c_str());
+  ControllerScreen.setCursor(3, 0);
+  // ControllerScreen.print("Battery: %d%%", Battery.capacity());
+  ControllerScreen.print("B: %d%% T: %.0fF", Battery.capacity(), liftTemp);
 }
 
 //set the drive speed
@@ -67,6 +76,61 @@ void setDriveSpeed(driveSpeed speed){
   updateScreen();
 }
 
+//constants for lift height (in degrees)
+#define LIFT_BOTTOM 0
+#define LIFT_LOW 200
+#define LIFT_MEDIUM 300
+#define LIFT_HIGH 475
+
+enum liftHeight{
+  liftBottom,
+  liftLow,
+  liftMedium,
+  liftHigh
+};
+
+void setLiftHeight(liftHeight height){
+  switch (height){
+    case liftBottom:
+      liftHeightText = "Bottom";
+
+      // Move down until the limit switch is reached
+      Lift.spin(reverse, 50, velocityUnits::pct);
+      while(!liftSwitch.pressing()) wait(20, msec);;
+      Lift.stop(hold);
+      Lift.resetRotation();
+
+      setDriveSpeed(driveMedium);
+    break;
+    case liftLow:
+      liftHeightText = "Low";
+      Lift.rotateTo(LIFT_LOW, deg, 50, velocityUnits::pct, false);
+      setDriveSpeed(driveSlow);
+    break;
+    case liftMedium:
+      liftHeightText = "Medium";
+      Lift.rotateTo(LIFT_MEDIUM, deg, 50, velocityUnits::pct, false);
+      setDriveSpeed(driveSlow);
+    break;
+    case liftHigh:
+      liftHeightText = "High";
+
+      // Move up until a physical stop is reached
+      Lift.spin(fwd, 50, velocityUnits::pct);
+      int startpos = Lift.position(deg);
+      while (1) {
+        wait(100, msec);
+        if (std::abs(Lift.position(deg) - startpos) < 10) {
+          break;
+        }
+      }
+      Lift.stop(hold);
+
+      setDriveSpeed(driveSlow);
+    break;
+  }
+}
+
 //apply deadzone and cubic scaling to joystick input value
 int inline joyaxis(int i) {
   return (abs(i) > DEADZONE ? int(pow(double(i)/100, 3)*100) : 0);
@@ -74,7 +138,15 @@ int inline joyaxis(int i) {
 
 //robot initialization
 void pre_auton(){
+  //set lift to 0 at start (for now, will later use switch to make sure it's at the bottom)
+  Lift.resetRotation();
+  Lift.setStopping(hold);
+
+  //set default drive speed and lift height
   setDriveSpeed(driveMedium);
+  setLiftHeight(liftBottom);
+
+  //update the screen every 5 seconds (to reflect current battery level)
   timer::event(updateScreen, 5000);
 }
 
@@ -92,6 +164,20 @@ void teleop(){
     setDriveSpeed(driveSlow);
   });
 
+  //change lift height:
+  Controller.ButtonDown.released([]{
+    setLiftHeight(liftBottom);
+  });
+  Controller.ButtonLeft.released([]{
+    setLiftHeight(liftLow);
+  });
+  Controller.ButtonRight.released([]{
+    setLiftHeight(liftMedium);
+  });
+  Controller.ButtonUp.released([]{
+    setLiftHeight(liftHigh);
+  });
+
   //main control loop
   while (true){
     //get joystick values and apply deadzone and cubic scaling
@@ -102,17 +188,6 @@ void teleop(){
     //drive speed scale factor
     LDrive.spin(fwd, scaleFactor * (axis3 + axis1), percent);
     RDrive.spin(fwd, scaleFactor * (axis3 - axis1), percent);
-
-    //lift motors on left shoulder buttons
-    if (Controller.ButtonL1.pressing()){
-      Lift.spin(fwd, 50, percent);
-    }
-    else if (Controller.ButtonL2.pressing()){
-      Lift.spin(reverse, 50, percent);
-    }
-    else{
-      Lift.stop(hold);
-    }
 
     //intake motors on right shoulder buttons
     if (Controller.ButtonR1.pressing()){

@@ -31,7 +31,6 @@ controller::lcd ControllerScreen(nullptr);
 
 brain::battery Battery;
 
-// bumper liftBottom = bumper(Brain.ThreeWirePort.A);
-// bumper liftBottom(Brain.ThreeWirePort.A);
+extern limit liftSwitch;
 
 #endif //DEVICES_H
