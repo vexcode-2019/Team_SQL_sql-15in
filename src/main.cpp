@@ -96,7 +96,7 @@ void setLiftHeight(liftHeight height){
 
       // Move down until the limit switch is reached
       Lift.spin(reverse, 50, velocityUnits::pct);
-      while(!liftSwitch.pressing()) wait(20, msec);;
+      while(!liftSwitch.pressing()) wait(20, msec);
       Lift.stop(hold);
       Lift.resetRotation();
 
@@ -117,13 +117,11 @@ void setLiftHeight(liftHeight height){
 
       // Move up until a physical stop is reached
       Lift.spin(fwd, 50, velocityUnits::pct);
-      int startpos = Lift.position(deg);
-      while (1) {
+      int startpos;
+      do {
+        startpos = Lift.position(deg);
         wait(100, msec);
-        if (std::abs(Lift.position(deg) - startpos) < 10) {
-          break;
-        }
-      }
+      } while (std::abs(Lift.position(deg) - startpos) > 1);
       Lift.stop(hold);
 
       setDriveSpeed(driveSlow);
