@@ -78,8 +78,8 @@ void setDriveSpeed(driveSpeed speed){
 
 //constants for lift height (in degrees)
 #define LIFT_BOTTOM 0
-#define LIFT_LOW 200
-#define LIFT_MEDIUM 300
+#define LIFT_LOW 280
+#define LIFT_MEDIUM 350
 #define LIFT_HIGH 475
 
 enum liftHeight{
@@ -96,8 +96,10 @@ void setLiftHeight(liftHeight height){
 
       // Move down until the limit switch is reached
       Lift.spin(reverse, 50, velocityUnits::pct);
-      while(!liftSwitch.pressing()) wait(20, msec);
-      Lift.stop(hold);
+      while(!liftSwitch.pressing() && liftHeightText == "Bottom") wait(20, msec);
+      if (liftHeightText != "Bottom") { return; }
+      wait(250, msec);
+      Lift.stop(coast);
       Lift.resetRotation();
 
       setDriveSpeed(driveMedium);
@@ -121,7 +123,8 @@ void setLiftHeight(liftHeight height){
       do {
         startpos = Lift.position(deg);
         wait(100, msec);
-      } while (std::abs(Lift.position(deg) - startpos) > 1);
+      } while (std::abs(Lift.position(deg) - startpos) > 1 && liftHeightText == "High");
+      if (liftHeightText != "High") { return; }
       Lift.stop(hold);
 
       setDriveSpeed(driveSlow);
@@ -137,7 +140,11 @@ int inline joyaxis(int i) {
 //robot initialization
 void pre_auton(){
   //set lift to 0 at start (for now, will later use switch to make sure it's at the bottom)
+
+  Lift.spin(reverse, 50, velocityUnits::pct);
+  wait(250, msec);
   Lift.resetRotation();
+  Lift.stop(coast);
   Lift.setStopping(hold);
 
   //set default drive speed and lift height
@@ -162,7 +169,7 @@ void teleop(){
     setDriveSpeed(driveSlow);
   });
 
-  //change lift height:
+  //Move lift to preset heights:
   Controller.ButtonDown.released([]{
     setLiftHeight(liftBottom);
   });
@@ -176,10 +183,24 @@ void teleop(){
     setLiftHeight(liftHigh);
   });
 
+  //Move lift up and down:
+  Controller.ButtonL1.pressed([]{
+    Lift.spin(directionType::fwd, 30, percentUnits::pct);
+  });
+  Controller.ButtonL1.released([]{
+    Lift.stop(hold);
+  });
+  Controller.ButtonL2.pressed([]{
+    Lift.spin(directionType::rev, 30, percentUnits::pct);
+  });
+  Controller.ButtonL2.released([]{
+    Lift.stop(hold);
+  });
+
   //main control loop
   while (true){
     //get joystick values and apply deadzone and cubic scaling
-    int axis1 = joyaxis(Controller.Axis1.position());
+    int axis1 = joyaxis(Controller.Axis1.position()) * 0.8;
     int axis3 = joyaxis(Controller.Axis3.position());
 
     //apply correct power to drive motors, scaled by current 
