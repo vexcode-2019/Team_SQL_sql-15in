@@ -36,6 +36,12 @@ enum driveSpeed{
   driveSlow
 };
 
+//uncomment to run programming skills routine in auto, leave commented for match auton
+#define PROG_SKILLS
+
+//uncomment for Blue match auton, leave commented out for red
+// #define BLUE
+
 //text description of current drive speed and lift height
 string driveSpeedText = "";
 string liftHeightText = "";
@@ -78,8 +84,8 @@ void setDriveSpeed(driveSpeed speed){
 
 //constants for lift height (in degrees)
 #define LIFT_BOTTOM 0
-#define LIFT_LOW 280
-#define LIFT_MEDIUM 350
+#define LIFT_LOW 320
+#define LIFT_MEDIUM 390
 #define LIFT_HIGH 475
 
 enum liftHeight{
@@ -223,9 +229,167 @@ void teleop(){
   }
 }
 
+void progSkills(){
+  Drivetrain.driveFor(directionType::fwd, 14, distanceUnits::in);
+  Drivetrain.driveFor(directionType::rev, 7, distanceUnits::in);
+
+  Drivetrain.turnFor(66, rotationUnits::deg);
+
+  Intake.spin(fwd, 50, velocityUnits::pct);
+  Drivetrain.driveFor(directionType::fwd, 18, distanceUnits::in);
+  task::sleep(1000);
+  Intake.stop();
+
+  Drivetrain.turnFor(-50, rotationUnits::deg);
+  Drivetrain.driveFor(fwd, 6, distanceUnits::in);
+  Intake.spinFor(fwd, 1, timeUnits::sec, 50, velocityUnits::pct);
+
+  setLiftHeight(liftLow);
+  task::sleep(1000);
+
+  Drivetrain.driveFor(fwd, 5, distanceUnits::in, 20, velocityUnits::pct);
+
+  Intake.spinFor(directionType::rev, 1, timeUnits::sec, 30, velocityUnits::pct);
+
+  setLiftHeight(liftBottom);
+  Drivetrain.driveFor(directionType::rev, 11, distanceUnits::in);
+  Drivetrain.turnFor(50, rotationUnits::deg);
+
+  Intake.spin(fwd, 50, velocityUnits::pct);
+  Drivetrain.driveFor(directionType::fwd, 8, distanceUnits::in);
+  task::sleep(1000);
+  Intake.stop();
+
+  Drivetrain.driveFor(directionType::rev, 11, distanceUnits::in);
+  Drivetrain.turnFor(66, rotationUnits::deg);
+  Drivetrain.driveFor(directionType::fwd, 20, distanceUnits::in);
+
+  Intake.spinFor(directionType::fwd, 1, timeUnits::sec, 50, velocityUnits::pct);
+
+  setLiftHeight(liftMedium);
+  task::sleep(1500);
+
+  Drivetrain.driveFor(directionType::fwd, 6, distanceUnits::in, 20, velocityUnits::pct);
+  Intake.spinFor(directionType::rev, 1, timeUnits::sec, 30, velocityUnits::pct);
+
+  Drivetrain.driveFor(directionType::rev, 6, distanceUnits::in, 20, velocityUnits::pct);
+  setLiftHeight(liftBottom);
+
+  Drivetrain.driveFor(directionType::rev, 10, distanceUnits::in);
+  Drivetrain.turnFor(-64, rotationUnits::deg);
+  Drivetrain.driveFor(directionType::fwd, 20, distanceUnits::in);
+
+  Intake.spin(fwd, 50, velocityUnits::pct);
+  Drivetrain.driveFor(directionType::fwd, 8, distanceUnits::in);
+  task::sleep(1000);
+  Intake.stop();
+
+  setLiftHeight(liftLow);
+  task::sleep(1000);
+
+  Drivetrain.driveFor(directionType::fwd, 4, distanceUnits::in, 20, velocityUnits::pct);
+  Intake.spinFor(directionType::rev, 1, timeUnits::sec, 30, velocityUnits::pct);
+
+  Drivetrain.driveFor(directionType::rev, 4, distanceUnits::in, 20, velocityUnits::pct);
+  setLiftHeight(liftBottom);
+
+  Drivetrain.turnFor(-66, rotationUnits::deg);
+  Drivetrain.driveFor(directionType::fwd, 18, distanceUnits::in);
+  Drivetrain.turnFor(75, rotationUnits::deg);
+  Drivetrain.driveFor(directionType::fwd, 30, distanceUnits::in);
+
+  Drivetrain.turnFor(-5, rotationUnits::deg);
+
+  Intake.spin(fwd, 50, velocityUnits::pct);
+  Drivetrain.driveFor(directionType::fwd, 10, distanceUnits::in, 20, velocityUnits::pct);
+  task::sleep(1000);
+  Intake.stop();
+
+  Drivetrain.turnFor(-50, rotationUnits::deg);
+
+  Drivetrain.driveFor(directionType::fwd, 8, distanceUnits::in, 20, velocityUnits::pct);
+  Intake.spinFor(directionType::fwd, 0.5, timeUnits::sec, 30, velocityUnits::pct);
+
+  setLiftHeight(liftLow);
+  task::sleep(1000);
+
+  Drivetrain.driveFor(directionType::fwd, 6, distanceUnits::in, 20, velocityUnits::pct);
+  Intake.spinFor(directionType::rev, 1, timeUnits::sec, 50, velocityUnits::pct);
+
+  Drivetrain.driveFor(directionType::rev, 6, distanceUnits::in, 20, velocityUnits::pct);
+  setLiftHeight(liftBottom);
+
+  Drivetrain.driveFor(directionType::rev, 6, distanceUnits::in, 20, velocityUnits::pct);
+  Drivetrain.turnFor(50, rotationUnits::deg);
+
+  Intake.spin(fwd, 50, velocityUnits::pct);
+  Drivetrain.driveFor(directionType::fwd, 6, distanceUnits::in, 20, velocityUnits::pct);
+  Drivetrain.turnFor(-25, rotationUnits::deg);
+  Drivetrain.driveFor(directionType::fwd, 24, distanceUnits::in, 50, velocityUnits::pct);
+  Intake.stop();
+  Intake.spinFor(directionType::rev, 1, timeUnits::sec, 50, velocityUnits::pct);
+}
+
+//multiplier is -1 for red auton, 1 for blue auton
+void matchAuton(float multiplier){
+  Drivetrain.driveFor(directionType::fwd, 14, distanceUnits::in);
+  Drivetrain.driveFor(directionType::rev, 7, distanceUnits::in);
+
+  Drivetrain.turnFor(multiplier * 66, rotationUnits::deg);
+
+  Intake.spin(fwd, 50, velocityUnits::pct);
+  Drivetrain.driveFor(directionType::fwd, 18, distanceUnits::in);
+  task::sleep(1000);
+  Intake.stop();
+
+  Drivetrain.turnFor(multiplier * -50, rotationUnits::deg);
+  Drivetrain.driveFor(fwd, 6, distanceUnits::in);
+  Intake.spinFor(fwd, 1, timeUnits::sec, 50, velocityUnits::pct);
+
+  setLiftHeight(liftLow);
+  task::sleep(1000);
+
+  Drivetrain.driveFor(fwd, 5, distanceUnits::in, 20, velocityUnits::pct);
+
+  Intake.spinFor(directionType::rev, 1, timeUnits::sec, 30, velocityUnits::pct);
+
+  setLiftHeight(liftBottom);
+  Drivetrain.driveFor(directionType::rev, 11, distanceUnits::in);
+  Drivetrain.turnFor(multiplier * 50, rotationUnits::deg);
+
+  Intake.spin(fwd, 50, velocityUnits::pct);
+  Drivetrain.driveFor(directionType::fwd, 8, distanceUnits::in);
+  task::sleep(1000);
+  Intake.stop();
+
+  Drivetrain.driveFor(directionType::rev, 18, distanceUnits::in);
+  Drivetrain.turnFor(multiplier * -87, rotationUnits::deg);
+
+  Intake.spinFor(directionType::fwd, 1, timeUnits::sec, 30, velocityUnits::pct);
+
+  Lift.rotateTo(170, rotationUnits::deg);
+  Drivetrain.driveFor(fwd, 8, distanceUnits::in, 20, velocityUnits::pct);
+
+  Intake.spinFor(directionType::rev, 1, timeUnits::sec, 30, velocityUnits::pct);
+
+  Drivetrain.driveFor(directionType::rev, 7, distanceUnits::in, 20, velocityUnits::pct);
+  setLiftHeight(liftBottom);
+}
+
 //empty auton for now
 void auton(){
+//run programming skills
+#ifdef PROG_SKILLS
+  progSkills();
+  return;
+#endif
 
+//otherwise, run match auton
+#ifdef BLUE
+  matchAuton(1.0);
+#else
+  matchAuton(-1.0);
+#endif
 }
 
 int main() {

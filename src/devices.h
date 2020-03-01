@@ -31,6 +31,8 @@ controller::lcd ControllerScreen(nullptr);
 
 brain::battery Battery;
 
+drivetrain Drivetrain = drivetrain(LDrive, RDrive, 12.56, 11.625, 7, distanceUnits::in, 1);
+
 extern limit liftSwitch;
 
 #endif //DEVICES_H
